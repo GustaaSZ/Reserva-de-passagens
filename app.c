@@ -6,6 +6,8 @@
 #define TamanhoCPF 12
 #define LISTA_PASSAGEIROS 100
 #define LISTA_ONIBUS 100
+#define TamanhoData 11
+#define TamanhoHorario 10
 
 // Defines utlizado para o onibus
 #define CadastrarOnibus 4
@@ -43,6 +45,10 @@ int main(){
     char origemBus[100];
     char destinoBus[100];
     int n;
+    char horarioPartida[TamanhoHorario];
+    char horarioChegada[TamanhoHorario];
+    char dataPartida[TamanhoData];
+    char dataChegada[TamanhoData];
 
     int diaViagem;
 
@@ -101,7 +107,7 @@ int main(){
                         //     exit(EXIT_FAILURE);
                         // }
 
-                        if(validarCPF(cpf) == true){
+                        // if(validarCPF(cpf) == true){
                             // DADOS BANCARIOS DA CONTA DO PASSAGEIRO
                             printf("Numero da conta bancaria: ");
                             scanf("%d", &numConta);
@@ -111,9 +117,9 @@ int main(){
 
                             // Adicionando o passageiro na lista de passageiros
                             pass_Append(Listapassageiros, nome, idade, cpf, numConta, saldo);    
-                        } else {
-                            printf("\nError: Nao foi possivel cadastrar o passageiro na pagina pois o cpf e invalido!\n");
-                        }
+                        // } else {
+                        //     printf("\nError: Nao foi possivel cadastrar o passageiro na pagina pois o cpf e invalido!\n");
+                        // }
                     }
                 }
             break;
@@ -147,9 +153,23 @@ int main(){
 
                         printf("Digite o valor da passagem: ");
                         scanf("%f", &valorPassagem);
+
+                        printf("Digite a data de partida: ");
+                        scanf("%s", dataPartida);
+
+                        printf("Digite a data de chegada: ");
+                        scanf("%s", dataChegada);
+
+                        printf("Digite o horario de partida: ");
+                        scanf("%s", horarioPartida);
+
+                        printf("Digite o provavel horario de chegada: ");
+                        scanf("%s", horarioChegada);
+
+
                         printf("\n");
 
-                        add_bus(lista_onibus, numBus, origemBus, destinoBus, capacidadeBus, valorPassagem);
+                        add_bus(lista_onibus, numBus, origemBus, destinoBus, capacidadeBus, valorPassagem, dataPartida, dataChegada, horarioPartida, horarioChegada);
                     }
                 }
             break;

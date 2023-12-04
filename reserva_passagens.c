@@ -9,6 +9,8 @@
 #define TAMANHO_CPF 12
 #define LISTA_PASSAGEIROS 100
 #define LISTA_ONIBUS 10
+#define TamanhoData 11
+#define TamanhoHorario 10
 
 typedef struct _passageiro{
     char nome[TAMAMHO_NOME];
@@ -43,6 +45,7 @@ typedef struct _bus{
     unsigned int num_bus_in_vec;
     unsigned int capacidadeMaxvector;
     float valor_passagem;
+    DadosViagem *dados_da_viagem;
 } Bus;
 
 // typedef struct _dadosViagem{
@@ -50,11 +53,12 @@ typedef struct _bus{
 //     Tempo chegada;
 // } DadosViagem;
 
-// typedef struct _tempo{
-//     int hora;
-//     int min;
-//     int seg;
-// } Tempo;
+typedef struct _dadosViagem{
+    char dataPartida_str[TamanhoData];
+    char dataChegada_str[TamanhoData];
+    char horarioPartida_str[TamanhoHorario];
+    char horarioChegada_str[TamanhoHorario];
+} DadosViagem;
 
 // Implementação das funções especificadas em reserva_passagens.h
 
@@ -96,7 +100,7 @@ Bus *criar_vec_bus(unsigned int capacidade){
 }
 
 // Add onibus ao vetor de onibus
-void add_bus(Bus *bus, unsigned int numBus, const char *origem, const char *destino, unsigned int capacidade, float valorPassagem){
+void add_bus(Bus *bus, unsigned int numBus, const char *origem, const char *destino, unsigned int capacidade, float valorPassagem, char *dataPartida, char *dataChegada, char *horarioPartida, char *horarioChegada){
     if(bus->num_bus_in_vec <= bus->capacidadeMaxvector){
         Bus new_bus;
         new_bus.numero_bus = numBus;
@@ -110,10 +114,25 @@ void add_bus(Bus *bus, unsigned int numBus, const char *origem, const char *dest
 
         // Aloca memória para a lista de passageiros do ônibus
         bus->vec_onibus[bus->num_bus_in_vec].lista_passageiros = (Passageiro *)calloc(capacidade, sizeof(Passageiro));
-        if (bus->vec_onibus->lista_passageiros == NULL) {
-            perror("Erro ao alocar memória para a lista de passageiros do ônibus");
+
+        // Aloca memória para os dados da viagem
+        bus->vec_onibus[bus->num_bus_in_vec].dados_da_viagem = (DadosViagem *) calloc(1, sizeof(DadosViagem));;
+
+        if(bus->vec_onibus->dados_da_viagem == NULL){
+            perror("Erro ao alocar memoria para os dados da viagem!\n");
             exit(EXIT_FAILURE);
         }
+
+        if (bus->vec_onibus->lista_passageiros == NULL) {
+            perror("Erro ao alocar memoria para a lista de passageiros do onibus!\n");
+            exit(EXIT_FAILURE);
+        }
+        // preenchendo os dados da viagem
+        strcpy(bus->vec_onibus[bus->num_bus_in_vec].dados_da_viagem->dataPartida_str, dataPartida);
+        strcpy(bus->vec_onibus[bus->num_bus_in_vec].dados_da_viagem->dataChegada_str, dataChegada);
+        strcpy(bus->vec_onibus[bus->num_bus_in_vec].dados_da_viagem->horarioPartida_str, horarioPartida);
+        strcpy(bus->vec_onibus[bus->num_bus_in_vec].dados_da_viagem->horarioChegada_str, horarioChegada);
+
         bus->num_bus_in_vec++;
         printf("\nOnibus de numero %d cadastrado com sucesso!\n\n", numBus);
 
@@ -125,8 +144,42 @@ void add_bus(Bus *bus, unsigned int numBus, const char *origem, const char *dest
     
 }
 
+
+void pass_Append(Passageiro *pass, const char *nome, unsigned int idade, const char *cpf, unsigned int numConta, float saldo){
+    if(pass->numPass < LISTA_PASSAGEIROS){
+        Passageiro new_pass;
+        strcpy(new_pass.nome, nome);
+        new_pass.idade = idade;
+        if(validarCPF(cpf) != true){ // validação do cpf
+            printf("\nNao foi possivel fazer seu cadastro pois o cpf digitado e invalido!\n");
+            exit(EXIT_FAILURE);
+        }
+        strcpy(new_pass.cpf, cpf);
+    
+        // Adicionar o novo passageiro ao vetor
+        pass->vec_passageiros[pass->numPass] = new_pass;
+
+        pass->vec_passageiros[pass->numPass].conta = (Conta *) calloc(1, sizeof(Conta)); // alocação de memoria para o ponteiro conta
+        if (pass->vec_passageiros->conta == NULL) {
+            perror("Erro ao alocar memória para a conta.\n");
+            exit(EXIT_FAILURE);
+        }
+        // Preencher os dados da conta
+        pass->vec_passageiros[pass->numPass].conta->numero_conta = numConta;
+        pass->vec_passageiros[pass->numPass].conta->saldo = saldo;
+
+        pass->numPass++;
+        printf("\nPassageiro cadastrado no site!\n\n");
+    } else {
+        fprintf(stderr,"Error in 'pass_Append', you are trying add passengers"
+        " in a vector, but there aren't available spaces!\n"); // Mensagem de erro
+        exit(EXIT_FAILURE); // mata o programa aqui e informa ao sistema operacional sobre esta falha
+    }
+}
+
+
 // Adiciona passageiros no onibus
-void comprar_passagem(Passageiro *passageiro, Bus *bus, char *cpf, unsigned int numBus) {
+void comprar_passagem(Passageiro *passageiro, Bus *bus, const char *cpf, unsigned int numBus) {
     int position = -1;
 
     // Verificando se a lista de passageiros e de onibus se encontra vazia
@@ -186,7 +239,7 @@ void comprar_passagem(Passageiro *passageiro, Bus *bus, char *cpf, unsigned int 
                         // Atualizar assentos disponíveis
                         bus->vec_onibus[position].assentos_disponiveis--;
 
-                        printf("_______________________________________________________________________");
+                        printf("_______________________________________________________________________\n");
                         printf("\n%s, voce acaba de adquirir uma passagem no onibus de numero %d!\n", passageiro->vec_passageiros[i].nome, bus->vec_onibus[position].numero_bus);
                         printf("_______________________________________________________________________\n");
 
@@ -207,35 +260,9 @@ void comprar_passagem(Passageiro *passageiro, Bus *bus, char *cpf, unsigned int 
     }
 }
 
-void pass_Append(Passageiro *pass, const char *nome, unsigned int idade, const char *cpf, unsigned int numConta, float saldo){
-    if(pass->numPass < LISTA_PASSAGEIROS){
-        Passageiro new_pass;
-        strcpy(new_pass.nome, nome);
-        new_pass.idade = idade;
-        strcpy(new_pass.cpf, cpf);
-    
-        // Adicionar o novo passageiro ao vetor
-        pass->vec_passageiros[pass->numPass] = new_pass;
-
-        pass->vec_passageiros[pass->numPass].conta = (Conta *) calloc(1, sizeof(Conta)); // alocação de memoria para o ponteiro conta
-        if (pass->vec_passageiros->conta == NULL) {
-            perror("Erro ao alocar memória para a conta.\n");
-            exit(EXIT_FAILURE);
-        }
-        // Preencher os dados da conta
-        pass->vec_passageiros[pass->numPass].conta->numero_conta = numConta;
-        pass->vec_passageiros[pass->numPass].conta->saldo = saldo;
-
-        pass->numPass++;
-        printf("\nPassageiro cadastrado no site!\n\n");
-    } else {
-        fprintf(stderr,"Error in 'pass_Append', you are trying add passengers"
-        " in a vector, but there aren't available spaces!\n"); // Mensagem de erro
-        exit(EXIT_FAILURE); // mata o programa aqui e informa ao sistema operacional sobre esta falha
-    }
-}
-
 void bus_print(const Bus *bus) {
+    int dp, mesPartida, ap, dc, mesChegada, ac;
+    int hp, mp, sp, hc, mc, sc;
     // Verificando se a lista de onibus está vazia
     if(lista_vazia(bus->num_bus_in_vec) != true){
 
@@ -250,8 +277,25 @@ void bus_print(const Bus *bus) {
             printf("Assentos Disponiveis: %d\n", bus->vec_onibus[i].assentos_disponiveis);
             printf("Valor da passagem: R$ %.2f\n", bus->vec_onibus[i].valor_passagem);
 
+            
+            sscanf(bus->vec_onibus[i].dados_da_viagem->dataPartida_str, "%d/%d/%d", &dp, &mesPartida, &ap);
+
+            // Converte a string do dia de partida em dia, mes, ano
+            sscanf(bus->vec_onibus[i].dados_da_viagem->dataChegada_str, "%d/%d/%d", &dc, &mesChegada, &ac);
+
+            // Converte a string do dia de partida em dia, mes, ano
+            sscanf(bus->vec_onibus[i].dados_da_viagem->horarioPartida_str, "%d:%d", &hp, &mp);
+
+            // Converte a string do dia de partida em dia, mes, ano
+            sscanf(bus->vec_onibus[i].dados_da_viagem->horarioChegada_str, "%d:%d:%d", &hc, &mc);
+            
+            printf("Data de Partida: %d/%d/%d\n", dp,mesPartida,ap);
+            printf("Data de Chegada: %d/%d/%d\n", dc,mesChegada,ac);
+            printf("Horario de Partida: %d:%d\n", hp,mp);
+            printf("'Provavel' Horario de Chegada: %d:%d\n", hc,mc);
+
             // Imprime a lista de passageiros
-            printf("\n* LISTA DE PASSAGEIROS\n\n");
+            printf("\n\n* LISTA DE PASSAGEIROS\n\n");
             printf("_____________________________\n\n");
             if (lista_vazia(bus->vec_onibus[i].lista_passageiros->numPass) == true) { 
                 printf("Vazio.\n");
@@ -316,7 +360,7 @@ void limparBuffer() {
 
 // Função para verificar se um CPF é válido
 
-bool validarCPF(char *cpf) {
+bool validarCPF(const char *cpf) {
     // Verificar se o CPF tem 11 dígitos
     if (strlen(cpf) != 11) {
         return false;
