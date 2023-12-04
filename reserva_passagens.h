@@ -20,5 +20,6 @@ void passageiroDadosConta_print(const Passageiro *passageiro);
 void pass_Append(Passageiro *pass, const char *nome, unsigned int idade, const char *cpf, unsigned int numConta, float saldo);
 void limparBuffer();
 bool validarCPF(const char *cpf);
+void gerarPassagemOnline(Bus *bus, const char *cpf);
 
 #endif

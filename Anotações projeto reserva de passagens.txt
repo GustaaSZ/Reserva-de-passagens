@@ -13,4 +13,6 @@ implementar funcao de att passageiro -
 implementar funcao de att onibus - 
 implementar funcao de buscar passageiro - 
 implementar funcao de bucar onibus - 
-implementar strcut de dadosViagem com horario de saida e chegada - 
+implementar strcut de dadosViagem com horario de saida e chegada - X
+Implementar função para manipular as datas - 
+Implementar função para manipular os horarios - X

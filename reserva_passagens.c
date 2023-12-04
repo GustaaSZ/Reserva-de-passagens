@@ -1,3 +1,4 @@
+// BIBLIOTECAS UTILIZADAS NO PROJETO
 #include "reserva_passagens.h"
 #include <stdio.h>
 #include <stdbool.h>
@@ -5,6 +6,8 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
+
+// DEFINES UTILIZADOS PARA DEFINIR TAMANHOS
 #define TAMAMHO_NOME 100
 #define TAMANHO_CPF 12
 #define LISTA_PASSAGEIROS 100
@@ -12,6 +15,7 @@
 #define TamanhoData 11
 #define TamanhoHorario 10
 
+// STRUCTS DO PROJETO
 typedef struct _passageiro{
     char nome[TAMAMHO_NOME];
     unsigned int idade;
@@ -23,8 +27,6 @@ typedef struct _passageiro{
 } Passageiro;
 
 // typedef struct _passagem{
-//     Passageiro *passageiro;
-//     DadosViagem *dadosViagem;
 //     Bus *bus;
 //     int numero_assento;
 // } Passagem;
@@ -48,11 +50,6 @@ typedef struct _bus{
     DadosViagem *dados_da_viagem;
 } Bus;
 
-// typedef struct _dadosViagem{
-//     Tempo partida;
-//     Tempo chegada;
-// } DadosViagem;
-
 typedef struct _dadosViagem{
     char dataPartida_str[TamanhoData];
     char dataChegada_str[TamanhoData];
@@ -60,10 +57,9 @@ typedef struct _dadosViagem{
     char horarioChegada_str[TamanhoHorario];
 } DadosViagem;
 
-// Implementação das funções especificadas em reserva_passagens.h
 
 // ********************* FUNÇÕES PRIVADAS *********************
-
+// Função para verificar se a lista esta vazia
 bool lista_vazia(int cont){
     if(cont == 0){
         return true;
@@ -72,7 +68,67 @@ bool lista_vazia(int cont){
     }
 }
 
+// Função para validar data
+bool validaData(const char *data){
+    int dia, mes, ano;
+    int resultado = sscanf(data, "%d/%d/%d", &dia, &mes, &ano);
+
+    if (resultado != 3) {
+        // A leitura não foi bem-sucedida
+        return false;
+    }
+
+    if (ano < 0 || mes < 1 || mes > 12 || dia < 1) {
+        return false;
+    }
+
+    // Verificar o número de dias no mês
+    int diasNoMes;
+    switch (mes) {
+        case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+            diasNoMes = 31;
+            break;
+        case 4: case 6: case 9: case 11:
+            diasNoMes = 30;
+            break;
+        case 2:
+            // Verificar ano bissexto
+            if ((ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0)) {
+                diasNoMes = 29;
+            } else {
+                diasNoMes = 28;
+            }
+            break;
+        default:
+            return false; // Mês inválido
+    }
+
+    if (dia > diasNoMes) {
+        return false; // Dia inválido para o mês
+    }
+
+    return true;
+}
+
+// Função para validar Horario
+bool validarHorario(const char *horario) {
+    int hora, minuto, segundo;
+    int resultado = sscanf(horario, "%d:%d:%d", &hora, &minuto, &segundo);
+
+    if (resultado != 3) {
+        // A leitura não foi bem-sucedida
+        return false;
+    }
+
+    if (hora < 0 || hora > 23 || minuto < 0 || minuto > 59 || segundo < 0 || segundo > 59) {
+        return false;
+    }
+
+    return true;
+}
+
 // ********************* FUNÇÕES PUBLICAS *********************
+// Implementação das funções especificadas em reserva_passagens.h
 
 // cria vetor para passageiros
 Passageiro *criar_paginaCadastroPassageiros(unsigned int capacidadeMax){
@@ -127,12 +183,23 @@ void add_bus(Bus *bus, unsigned int numBus, const char *origem, const char *dest
             perror("Erro ao alocar memoria para a lista de passageiros do onibus!\n");
             exit(EXIT_FAILURE);
         }
-        // preenchendo os dados da viagem
-        strcpy(bus->vec_onibus[bus->num_bus_in_vec].dados_da_viagem->dataPartida_str, dataPartida);
-        strcpy(bus->vec_onibus[bus->num_bus_in_vec].dados_da_viagem->dataChegada_str, dataChegada);
-        strcpy(bus->vec_onibus[bus->num_bus_in_vec].dados_da_viagem->horarioPartida_str, horarioPartida);
-        strcpy(bus->vec_onibus[bus->num_bus_in_vec].dados_da_viagem->horarioChegada_str, horarioChegada);
+        // ----- PREENCHENDO OS DADOS DA VIAGEM ----- 
+        if(validaData(dataPartida) == true && validaData(dataChegada) == true){ // validação da data
+            strcpy(bus->vec_onibus[bus->num_bus_in_vec].dados_da_viagem->dataPartida_str, dataPartida);
+            strcpy(bus->vec_onibus[bus->num_bus_in_vec].dados_da_viagem->dataChegada_str, dataChegada);
+        } else {
+            perror("Error: Data invalida!\n");
+            exit(EXIT_FAILURE);
+        }
 
+        if(validarHorario(horarioPartida) == true && validarHorario(horarioChegada) == true){ // validação do horario
+            strcpy(bus->vec_onibus[bus->num_bus_in_vec].dados_da_viagem->horarioPartida_str, horarioPartida);
+            strcpy(bus->vec_onibus[bus->num_bus_in_vec].dados_da_viagem->horarioChegada_str, horarioChegada);
+        } else {
+            perror("Error: Horario invalido!\n");
+            exit(EXIT_FAILURE);
+        }
+        
         bus->num_bus_in_vec++;
         printf("\nOnibus de numero %d cadastrado com sucesso!\n\n", numBus);
 
@@ -257,6 +324,47 @@ void comprar_passagem(Passageiro *passageiro, Bus *bus, const char *cpf, unsigne
                 printf("Passageiro de cpf %s nao encontrado!\n", cpf);
             }
         }
+    }
+}
+
+
+// // Função que gera passagem
+void gerarPassagemOnline(Bus *bus, const char *cpf){
+
+    // time_t tempoAtual;
+    // time(&tempoAtual);
+
+    // // Converter o tempo para a estrutura tm no fuso horário local
+    // struct tm *infoTempo = localtime(&tempoAtual);
+
+    // // Imprimir os componentes da estrutura tm
+    // printf("Data e Hora Atuais: %02d/%02d/%04d %02d:%02d:%02d\n",
+    // infoTempo->tm_mday, infoTempo->tm_mon + 1, infoTempo->tm_year + 1900,
+    // infoTempo->tm_hour, infoTempo->tm_min, infoTempo->tm_sec);
+
+
+    while(validarCPF(cpf) == false){ // validação do cpf digitado
+        printf("CPF invalido, digite novamente!\n");
+        gerarPassagemOnline(bus, cpf);
+    }
+    int achei = 0;
+    for(int i = 0; i < bus->num_bus_in_vec; i++){ // Acessa aos onibus da lista
+        for (int j = 0; j < bus->vec_onibus[i].capacidade - bus->vec_onibus[i].assentos_disponiveis; j++) { // acessa a lista de passageiros de cada bus da lista
+            if(strcmp(bus->vec_onibus[i].lista_passageiros[j].cpf, cpf) == 0){
+                achei = 1;
+                printf("\n* P A S S A G E M *\n");
+                printf("\nNome: %s\n", bus->vec_onibus[i].lista_passageiros[j].nome);
+                printf("Cpf: %s\n", bus->vec_onibus[i].lista_passageiros[j].cpf);
+                printf("Origem: %s\n", bus->vec_onibus[i].origem);
+                printf("Destino: %s\n", bus->vec_onibus[i].destino);
+                printf("Data de partida: %s\n", bus->vec_onibus[i].dados_da_viagem->dataPartida_str);
+                printf("Horario de partida: %s\n", bus->vec_onibus[i].dados_da_viagem->horarioPartida_str);
+                // printf("Faltam x dias para o dia da viagem.");
+            }
+        }
+    }
+    if(achei == 0){
+        printf("Passageiro nao encontrado!\n");
     }
 }
 

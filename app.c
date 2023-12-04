@@ -13,13 +13,14 @@
 #define CadastrarOnibus 4
 #define PrintOnibus 5
 #define ComprarPassagem 6
+#define GerarPassagem 7
 
 // Defines utilizados para o passageiro
 #define CadastrarPassageiro 1
 #define print_Passageiros 2
 #define ListarContas 3
 
-#define SAIR 8
+#define SAIR 9
 
 typedef struct{
     int dia;
@@ -71,7 +72,8 @@ int main(){
         printf("4) Cadastrar Onibus.\n");
         printf("5) Listar Onibus.\n");
         printf("6) Comprar passagem de onibus.\n");
-        printf("7) ver hora atual.\n");
+        printf("7) Gerar passagem.\n");
+        printf("8) Ver hora atual.\n");
         // printf("7) Atualizar Aluno.\n");
         // printf("8) Listar Alunos.\n");
         // printf("9) Buscar Aluno.\n");
@@ -186,7 +188,13 @@ int main(){
                 comprar_passagem(Listapassageiros, lista_onibus, cpf, numBus);
             break;
 
-            case 7:
+            case GerarPassagem:
+                printf("Digite seu cpf: ");
+                scanf("%s", cpf);
+                gerarPassagemOnline(lista_onibus,cpf);
+            break;
+            
+            case 8:
                 // Calculo da hora
                 // struct tm tempo;
                 // time_t tempoSeg;
