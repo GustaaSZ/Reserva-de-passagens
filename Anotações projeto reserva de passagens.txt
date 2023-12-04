@@ -1,0 +1,16 @@
+Mini Projeto de Reserva de passagens de ônibus em C:
+- FUNÇÕES A SEREM IMPLEMENTADAS:
+
+verificação de cpf - X
+verificação de nomes iguais - 
+não permitir a compra de passagem de um mesmo passageiro para o mesmo onibus duas vezes - 
+criar uma variável de uma strcut de conta para o passageiro - X
+criar uma variável de valorPassagem para o cadastro de cada bus - X
+implementar a struct de reserva/ (passagem) - 
+implementar função de remover passageiro - 
+implementar função de remover onibus - 
+implementar funcao de att passageiro - 
+implementar funcao de att onibus - 
+implementar funcao de buscar passageiro - 
+implementar funcao de bucar onibus - 
+implementar strcut de dadosViagem com horario de saida e chegada - 
