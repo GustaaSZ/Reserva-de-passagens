@@ -59,7 +59,7 @@ int main(){
     
     do{
 
-        printf("\n1) Cadastar Passageiro.\n");
+        printf("\n1) Cadastrar Passageiro.\n");
         printf("2) Listar Passageiros.\n");
         printf("3) Listar contas bancarias dos passageiros.\n");
         printf("4) Cadastrar Onibus.\n");
